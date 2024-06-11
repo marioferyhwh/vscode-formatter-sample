@@ -12,17 +12,29 @@ export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit
 // Función para formatear un documento
 export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
   const edits: vscode.TextEdit[] = [];
+  let formattedText = '';
 
+  // Recorrer todas las líneas del documento
   for (let i = 0; i < document.lineCount; i++) {
-    const line = document.lineAt(i);
-    const trimmedLine = line.text.trim();
+      const line = document.lineAt(i);
+      const trimmedLine = line.text.trim();
 
-    // Detectar y formatear 'if' statements
-    if (trimmedLine.startsWith('if(') && trimmedLine.endsWith('){')) {
-      const formattedText = line.text.replace(/if\s*\(\s*(.*)\s*\)\s*{/, 'if ( $1 ) {');
-      edits.push(vscode.TextEdit.replace(line.range, formattedText));
-    }
+      // Formatear la línea eliminando espacios dobles y espacios al final del renglón
+      const formattedLine = trimmedLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
+      
+
+      // Agregar espacios al final del documento
+      formattedText += formattedLine + (i < document.lineCount - 1 ? '\n\n' : '\n');
   }
+
+  formattedText = formattedText.replace(/\{/g, '{\n');
+  // Eliminar saltos de línea consecutivos si hay más de uno
+  formattedText = formattedText.replace(/\n{3,}/g, '\n\n');
+
+  // Reemplazar todo el contenido del documento con el texto formateado
+  const lastLine = document.lineAt(document.lineCount - 1);
+  const range = new vscode.Range(0, 0, lastLine.range.end.line, lastLine.range.end.character);
+  edits.push(vscode.TextEdit.replace(range, formattedText));
 
   return edits;
 };
