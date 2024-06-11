@@ -3,8 +3,9 @@
 import * as vscode from 'vscode';
 
 export function activate(context: vscode.ExtensionContext) {
-
-  
+  const  LANGUAGE_ID="any-lang";
+  const  COMMAND_FORMAT="extension.format-any";
+    
     // Función para formatear un documento
     const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
       const edits: vscode.TextEdit[] = [];
@@ -32,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
       }
     };
     // 👎 formatter implemented as separate command
-    vscode.commands.registerCommand('extension.format-any', () => {
+    vscode.commands.registerCommand(COMMAND_FORMAT, () => {
         const {activeTextEditor} = vscode.window;
 
         if (activeTextEditor) {
@@ -43,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     // 👍 formatter implemented using API
-    vscode.languages.registerDocumentFormattingEditProvider('any-lang', {
+    vscode.languages.registerDocumentFormattingEditProvider(LANGUAGE_ID, {
       provideDocumentFormattingEdits(document: vscode.TextDocument): vscode.TextEdit[] {
         return formatDocument(document);
       }
@@ -56,9 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 
       vscode.window.showInformationMessage("0 commando");
 
-      if (document.languageId !== 'any-lang' &&  document.fileName.endsWith('.foo')) {
+      if (document.languageId !== LANGUAGE_ID &&  document.fileName.endsWith('.foo')) {
         vscode.window.showInformationMessage("2 commando");
-        vscode.commands.executeCommand('extension.format-any');
+        vscode.commands.executeCommand(COMMAND_FORMAT);
       }
   });
   
