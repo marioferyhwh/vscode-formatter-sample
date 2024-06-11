@@ -11,13 +11,13 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:foo-lang"
+        "onLanguage:any-lang"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "languages": [
             {
-                "id": "foo-lang",
+                "id": "any-lang",
                 "aliases": [
                     "Foo"
                 ],
@@ -28,8 +28,8 @@
         ],
         "commands": [
             {
-                "command": "extension.format-foo",
-                "title": "(Bad) Format Foo Files"
+                "command": "extension.format-any",
+                "title": "Format any Files"
             }
         ]
     },
