@@ -11,6 +11,7 @@
         "Other"
     ],
     "activationEvents": [
+        "*",
         "onLanguage:any-lang"
     ],
     "main": "./out/src/extension",
