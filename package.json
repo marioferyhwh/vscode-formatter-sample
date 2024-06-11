@@ -1,9 +1,9 @@
 {
-    "name": "formatter-sample",
-    "displayName": "formatter-sample",
-    "description": "",
-    "version": "0.0.1",
-    "publisher": "jrieken",
+    "name": "formatter-objectscript",
+    "displayName": "formatter-any",
+    "description": "format ObjectScript language",
+    "version": "0.0.2",
+    "publisher": "mfrobayo",
     "engines": {
         "vscode": "^1.6.0"
     },
@@ -11,34 +11,54 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:foo-lang"
+        "onLanguage:objectscript"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "languages": [
             {
-                "id": "foo-lang",
+                "id": "objectscript",
                 "aliases": [
-                    "Foo"
+                    "ObjectScript"
                 ],
                 "extensions": [
-                    "foo"
+                    ".cls"
                 ]
             }
         ],
         "commands": [
             {
-                "command": "extension.format-foo",
-                "title": "(Bad) Format Foo Files"
+              "command": "extension.formatObjectScript",
+              "title": "Format ObjectScript Files"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Formatter ObjectScript",
+            "properties": {
+                "formatterSample.indentationSize": {
+                    "type": "number",
+                    "default": 2,
+                    "minimum": 1,
+                    "description": "Number of spaces for indentation"
+                },
+                "formatterSample.indentationType": {
+                    "type": "string",
+                    "enum": ["space", "tab"],
+                    "default": "space",
+                    "description": "Type of indentation"
+                }
+            }
+        }
     },
     "scripts": {
-        "postinstall": "node ./node_modules/vscode/bin/install && tsc"
+        "postinstall": "node ./node_modules/vscode/bin/install && tsc",
+        "generate": "vsce package",
+        "publish": "vsce publish"
     },
     "devDependencies": {
-        "@types/node": "*",
-        "vscode": "1.0.3",
-        "typescript": "2.0.6"
+        "@types/node": "^20.14.2",
+        "typescript": "^5.4.5",
+        "vscode": "^1.1.37"
     }
 }
