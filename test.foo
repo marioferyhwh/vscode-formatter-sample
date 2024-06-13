@@ -4,14 +4,28 @@ Class MyApp.PatientManager Extends %Persistent
 
 Property Name As %String;
 
-
+//validar  asignacion
 Method SetName(pName As %String) {
 
     Set ..Name =pName;
+    Set ..Name= pName;
+    Set ..Name   = pName;
+    Set ..Name=pName;
 
 }
 
+//operaciones iguales
 Method GetName() As %String {
+  if(1=   2){
+  }
+  if(1 >=2){
+  }
+  if(1<=  2){
+  }
+  if(1'=2){
+  }
+  if(1=2){
+  }
        Quit ..Name;
 }
 
@@ -20,22 +34,33 @@ Method Save() As %Status {
         Set sc=..%Save();
     }        Catch (Exception e) {
         Set sc = e.AsStatus();
-    }
+           }
     Quit sc;
 }
 
 ClassMethod Test() As %Status {
     Try {
         // Esto es una prueba de método
-        Set name = "John";
-        If (name = "John") {
+        Set name     ="John";     
+        If (name= "John") {
         Write "Hello, John!";
         } Else{
           Write "Hello, someone else!";
         }
     }     Catch     (Exception e) {
 Write "Error: ", e.Message;
-    }
+            }
+    Try {
+        // Esto es una prueba de método
+        Set name     ="John";     
+        If (name= "John") {
+        Write "Hello, John!";
+        } Else{
+          Write "Hello, someone else!";
+        }
+    }Catch(Exception e) {
+Write "Error: ", e.Message;
+            }
     Quit $$$OK;
 }
 

@@ -8,9 +8,7 @@ export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit
     edits.forEach(edit => workspaceEdit.replace(document.uri, edit.range, edit.newText));
     vscode.workspace.applyEdit(workspaceEdit);
   }
-};
-
-
+}
 
 //(\/\/.*$|\/\*(.|\n)*?\*\/)
 const formaBaseLine = (textLine: string):string =>{
@@ -25,9 +23,17 @@ const formaBaseLine = (textLine: string):string =>{
 
   // Eliminar espacios dobles y al final del renglón
   nuwTextLine = nuwTextLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
+  // Eliminar líneas que contienen solo espacios o tabs
+  nuwTextLine = nuwTextLine.replace(/^[ \t]+$/gm, '');
   return nuwTextLine;
 }
 
+const addIdentado = (textLine: string,indentationLevel :number = 0):string =>{
+  if (!textLine){
+    return ""
+  }
+  return '\t'.repeat(indentationLevel) + textLine;
+}
 
 // Función para limpiar y formatear las líneas del documento
 const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
@@ -41,30 +47,33 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 
     const formattedLine = formaBaseLine(trimmedLine);
 
+
+    if (/^\}$/.test(trimmedLine)) {
+      indentationLevel = Math.max(0, indentationLevel - 1);
+    }
+
     // Ajustar la indentación adecuada
-    const indentedLine = '\t'.repeat(indentationLevel) + formattedLine;
-    formattedLines.push(indentedLine);
+    const indentedLine = addIdentado(formattedLine,indentationLevel);
 
     // Ajustar el nivel de indentación según las llaves de apertura y cierre
     if (/\{$/.test(trimmedLine)) {
       indentationLevel++;
-    } else if (/^\}$/.test(trimmedLine)) {
-      indentationLevel = Math.max(0, indentationLevel - 1);
     }
+
+    formattedLines.push(indentedLine);
   }
   
   return formattedLines;
 }
 
 const  clearCode =  (text: string):string =>{
-  // Eliminar líneas que contienen solo espacios o tabs
-  let nuwText = text.replace(/^[ \t]+$/gm, '');
+  let nuwText = text;
 
-  // Quitar espacios vacíos después de {
+  // Quitar saltos de liena después de {
   nuwText = nuwText.replace(/(\{)\n{2,}/g, '$1\n');
 
   // Quitar renglones vacíos antes de }
-  nuwText = nuwText.replace(/\n{2,}(\})/g, '\n$1');
+  nuwText = nuwText.replace(/\n{2,}(\s*\})/g, '\n$1');
 
   // Eliminar saltos de línea consecutivos si hay más de uno
   nuwText = nuwText.replace(/\n{3,}/g, '\n\n');
@@ -82,7 +91,7 @@ export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[]
 
   //\{|\(|\[
   // Agregar saltos de línea a los corchetes
-  formattedText = formattedText.replace(/(\{)/g, '$1\n').replace(/(\})/g, '\n$1\n');
+  formattedText = formattedText.replace(/(\{)/g, '$1\n')//.replace(/(\s*\})/g, '\n$1\n');
 
   formattedText = clearCode(formattedText);
 
