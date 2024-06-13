@@ -1,3 +1,4 @@
+
 import * as vscode from 'vscode';
 
 // Función para aplicar ediciones al documento
@@ -9,51 +10,81 @@ export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit
   }
 };
 
+
+
+//(\/\/.*$|\/\*(.|\n)*?\*\/)
+const formaBaseLine = (textLine: string):string =>{
+  //agrega espacios en logica
+  let nuwTextLine = textLine.replace(/(if|else|elseif|try|catch|while|for|switch)\s*\(\s*([^{]*)\s*\)\s*/gi, '$1 ( $2 ) ');
+  //agrega espacio en operadores
+  nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, ' $1 ');
+  //separacionde ,
+  nuwTextLine = nuwTextLine.replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
+    return match.replace(/\s*,\s*/g, ", ");
+  });
+
+  // Eliminar espacios dobles y al final del renglón
+  nuwTextLine = nuwTextLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
+  return nuwTextLine;
+}
+
+
+// Función para limpiar y formatear las líneas del documento
+const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
+  const formattedLines: string[] = [];
+
+  let indentationLevel = 0;
+
+  for (let i = 0; i < document.lineCount; i++) {
+    const line = document.lineAt(i);
+    const trimmedLine = line.text.trim();
+
+    const formattedLine = formaBaseLine(trimmedLine);
+
+    // Ajustar la indentación adecuada
+    const indentedLine = '\t'.repeat(indentationLevel) + formattedLine;
+    formattedLines.push(indentedLine);
+
+    // Ajustar el nivel de indentación según las llaves de apertura y cierre
+    if (/\{$/.test(trimmedLine)) {
+      indentationLevel++;
+    } else if (/^\}$/.test(trimmedLine)) {
+      indentationLevel = Math.max(0, indentationLevel - 1);
+    }
+  }
+  
+  return formattedLines;
+}
+
+const  clearCode =  (text: string):string =>{
+  // Eliminar líneas que contienen solo espacios o tabs
+  let nuwText = text.replace(/^[ \t]+$/gm, '');
+
+  // Quitar espacios vacíos después de {
+  nuwText = nuwText.replace(/(\{)\n{2,}/g, '$1\n');
+
+  // Quitar renglones vacíos antes de }
+  nuwText = nuwText.replace(/\n{2,}(\})/g, '\n$1');
+
+  // Eliminar saltos de línea consecutivos si hay más de uno
+  nuwText = nuwText.replace(/\n{3,}/g, '\n\n');
+
+  // Eliminar saltos de línea dobles al final del documento, dejar solo uno
+  nuwText = nuwText.replace(/\n{2,}$/g, '\n');
+
+  return nuwText;
+}
+
 // Función para formatear un documento
 export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
   const edits: vscode.TextEdit[] = [];
-  let formattedText = '';
-  let indentationLevel = 0;
+  let formattedText = cleanAndFormatLines(document).join('\n');
 
-  // Recorrer todas las líneas del documento
-  for (let i = 0; i < document.lineCount; i++) {
-      const line = document.lineAt(i);
-      const trimmedLine = line.text.trim();
-
-      // Formatear la línea eliminando espacios dobles y espacios al final del renglón
-      const formattedLine = trimmedLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
-
-      // Agregar la indentación adecuada
-      formattedText += '\t'.repeat(indentationLevel) + formattedLine;
-
-      // Determinar si la línea abre o cierra un bloque
-      const openingBrace = /\{$/.test(trimmedLine);
-      const closingBrace = /^\}$/.test(trimmedLine);
-
-      // Ajustar el nivel de indentación según las llaves de apertura y cierre
-      if (openingBrace) {
-          indentationLevel++;
-      } else if (closingBrace) {
-          indentationLevel = Math.max(0, indentationLevel - 1);
-      }
-
-      // Agregar un salto de línea después de cada línea, excepto la última
-      formattedText += '\n';
-  }
   //\{|\(|\[
-  //agregar saltos de linea a los corchetes
-  formattedText = formattedText.replace(/(\{)/g, '$1\n');
-  formattedText = formattedText.replace(/(\})/g, '\n$1\n');
-  // las de solo espacios o tabs son limpiadas 
-  formattedText = formattedText.replace(/^[ \t]+$/gm, '');
-  //se quitan espacios vacios despues de las {
-  formattedText = formattedText.replace(/(\{)\n{2,}/g, '$1\n');
-  //se quitan renglones vaciona antes de }
-  formattedText = formattedText.replace(/\n{2,}(\})/g, '\n\$1');
-  // Eliminar saltos de línea consecutivos si hay más de uno
-  formattedText = formattedText.replace(/\n{3,}/g, '\n\n');
-  // elimina si hay mas de 2 saltos de linea al final
-  formattedText = formattedText.replace(/\n{2,}$/g, '\n');
+  // Agregar saltos de línea a los corchetes
+  formattedText = formattedText.replace(/(\{)/g, '$1\n').replace(/(\})/g, '\n$1\n');
+
+  formattedText = clearCode(formattedText);
 
   // Reemplazar todo el contenido del documento con el texto formateado
   const lastLine = document.lineAt(document.lineCount - 1);

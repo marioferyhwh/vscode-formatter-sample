@@ -31,8 +31,8 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidSaveTextDocument(document => {
     vscode.window.showInformationMessage("Se detecta guardado");
     if (document.languageId !== LANGUAGE_ID && document.fileName.endsWith('.foo')) {
-      const edits = formatDocument(document);
-      applyEdits(document, edits);
+      //const edits = formatDocument(document);
+      //applyEdits(document, edits);
     }
   });
 }

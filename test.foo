@@ -1,0 +1,42 @@
+Class MyApp.PatientManager Extends %Persistent
+{
+
+
+Property Name As %String;
+
+
+Method SetName(pName As %String) {
+
+    Set ..Name =pName;
+
+}
+
+Method GetName() As %String {
+       Quit ..Name;
+}
+
+Method Save() As %Status {
+  Try {
+        Set sc=..%Save();
+    }        Catch (Exception e) {
+        Set sc = e.AsStatus();
+    }
+    Quit sc;
+}
+
+ClassMethod Test() As %Status {
+    Try {
+        // Esto es una prueba de método
+        Set name = "John";
+        If (name = "John") {
+        Write "Hello, John!";
+        } Else{
+          Write "Hello, someone else!";
+        }
+    }     Catch     (Exception e) {
+Write "Error: ", e.Message;
+    }
+    Quit $$$OK;
+}
+
+}
