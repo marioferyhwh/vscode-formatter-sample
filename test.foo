@@ -23,14 +23,24 @@ Method GetName() As %String {
   if(1<=  2){
   }
   if(1'=2){
-  }
   if(1=2){
+  }
   }
        Quit ..Name;
 }
 
 Method Save() As %Status {
   Try {
+        Set sc=..%Save();
+    }        Catch (Exception e) {
+        Set sc = e.AsStatus();
+           }
+  Try{
+        Set sc=..%Save();
+    }        Catch (Exception e) {
+        Set sc = e.AsStatus();
+           }
+Try{
         Set sc=..%Save();
     }        Catch (Exception e) {
         Set sc = e.AsStatus();
@@ -64,4 +74,18 @@ Write "Error: ", e.Message;
     Quit $$$OK;
 }
 
+
+
+Method GetName2() As %String {
+  if(1=   2){
+  }
+  if(1 >=2){
+  }
+  if(1<=  2){
+  }
+  if(1'=2){
+  if(1=2){
+  }}
+       Quit ..Name;
+}
 }

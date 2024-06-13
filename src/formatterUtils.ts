@@ -12,8 +12,11 @@ export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit
 
 //(\/\/.*$|\/\*(.|\n)*?\*\/)
 const formaBaseLine = (textLine: string):string =>{
+  let nuwTextLine = textLine;
   //agrega espacios en logica
-  let nuwTextLine = textLine.replace(/(if|else|elseif|try|catch|while|for|switch)\s*\(\s*([^{]*)\s*\)\s*/gi, '$1 ( $2 ) ');
+  nuwTextLine = nuwTextLine.replace(/(if|else|elseif|try|catch|while|for|switch)\s*\(\s*([^{]*)\s*\)\s*/gi, '$1 ( $2 ) ');
+  nuwTextLine = nuwTextLine.replace(/\}\s*(catch|else|elseif)\s*/gi, '} $1 ');
+  nuwTextLine = nuwTextLine.replace(/\s*(try)\s*\{/gi, '$1 {');
   //agrega espacio en operadores
   nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, ' $1 ');
   //separacionde ,
@@ -47,15 +50,15 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 
     const formattedLine = formaBaseLine(trimmedLine);
 
-
-    if (/^\}$/.test(trimmedLine)) {
+    // Ajustar el nivel de indentación según las llaves de cierre
+    if (/\}/.test(trimmedLine)) {
       indentationLevel = Math.max(0, indentationLevel - 1);
     }
 
     // Ajustar la indentación adecuada
     const indentedLine = addIdentado(formattedLine,indentationLevel);
 
-    // Ajustar el nivel de indentación según las llaves de apertura y cierre
+    // Ajustar el nivel de indentación según las llaves de apertura
     if (/\{$/.test(trimmedLine)) {
       indentationLevel++;
     }
