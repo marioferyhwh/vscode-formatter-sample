@@ -72,6 +72,22 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 const  clearCode =  (text: string):string =>{
   let nuwText = text;
 
+  //([ \t]*)(.*)}}+
+  //corregir }}
+  //^([ \t])*([^\}\n]*)\s*(}}+)
+  nuwText = nuwText.replace(/^([ \t]*)([^\}\n]*?)(}}+)/gm,(match, p1, p2, p3) => {
+    let text = p1 + p2;
+    let space = p1;
+    text = p3.split('').reduce( (prev,dat,index)=>{
+      if (index == 0){
+        return  prev + dat;
+      }
+      space = space.slice(0, -1);
+      return prev +"\n"+space+dat;
+    },text)
+    return text;
+  });
+  
   // Quitar saltos de liena después de {
   nuwText = nuwText.replace(/(\{)\n{2,}/g, '$1\n');
 
