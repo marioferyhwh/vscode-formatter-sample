@@ -19,7 +19,7 @@ const formaBaseLine = (textLine: string):string =>{
   nuwTextLine = nuwTextLine.replace(/\s*(try)\s*\{/gi, '$1 {');
   //agrega espacio en operadores
   nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, ' $1 ');
-  //separacionde ,
+  //separacionde (a,b,    b   )=>(a, b, b)
   nuwTextLine = nuwTextLine.replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
     return match.replace(/\s*,\s*/g, ", ");
   });
@@ -87,7 +87,7 @@ const  clearCode =  (text: string):string =>{
     },text)
     return text;
   });
-  
+
   // Quitar saltos de liena después de {
   nuwText = nuwText.replace(/(\{)\n{2,}/g, '$1\n');
 
@@ -106,6 +106,7 @@ const  clearCode =  (text: string):string =>{
 // Función para formatear un documento
 export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
   const edits: vscode.TextEdit[] = [];
+
   let formattedText = cleanAndFormatLines(document).join('\n');
 
   //\{|\(|\[
