@@ -31,7 +31,7 @@ const formaBaseLine = (textLine: string):string =>{
   return nuwTextLine;
 }
 
-const charIdent="\t"
+const charIdent=" "
 const numberCharIdent=2
 
 const getIdentationLevel = (textLine: string):number => {
@@ -43,7 +43,7 @@ const getIdentationLevel = (textLine: string):number => {
   if (!arrayIdent){
     return 0;
   }
-  return arrayIdent.length
+  return arrayIdent.length/numberCharIdent;
 }
 
 const getTextIdent = (indentationLevel:number):string =>{
@@ -106,13 +106,13 @@ const  clearCode =  (text: string):string =>{
   //^([ \t])*([^\}\n]*)\s*(}}+)
   nuwText = nuwText.replace(/^([ \t]*)([^\}\n]*?)(}}+)/gm,(match, p1, p2, p3) => {
     let text = p1 + p2;
-    let space = p1;
+    let identationLevel = getIdentationLevel(p1)
     text = p3.split('').reduce( (prev,dat,index)=>{
       if (index == 0){
         return  prev + dat;
       }
-      space = space.slice(0, -1);
-      return prev +"\n"+space+dat;
+      identationLevel--;
+      return prev +"\n"+getTextIdent(identationLevel)+dat;
     },text);
     return text;
   });
