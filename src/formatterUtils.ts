@@ -31,18 +31,41 @@ const formaBaseLine = (textLine: string):string =>{
   return nuwTextLine;
 }
 
+const charIdent="\t"
+const numberCharIdent=2
+
+const getIdentationLevel = (textLine: string):number => {
+  const textIdent = textLine.match(/^([ \t]*)/)
+  if (!textIdent) {
+    return 0;
+  }
+  const arrayIdent = textIdent[1].match(/([ \t])/g)
+  if (!arrayIdent){
+    return 0;
+  }
+  return arrayIdent.length
+}
+
+const getTextIdent = (indentationLevel:number):string =>{
+  if (indentationLevel <= 0){
+    return "";
+  }
+  return charIdent.repeat(indentationLevel*numberCharIdent);
+}
+
 const addIdentado = (textLine: string,indentationLevel :number = 0):string =>{
   if (!textLine){
     return ""
   }
-  return '\t'.repeat(indentationLevel) + textLine;
+
+  return getTextIdent(indentationLevel) + textLine;
 }
 
 // Función para limpiar y formatear las líneas del documento
 const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
   const formattedLines: string[] = [];
 
-  let indentationLevel = 0;
+  let indentationLevel = -1;
 
   for (let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
@@ -50,16 +73,22 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 
     const formattedLine = formaBaseLine(trimmedLine);
 
+    const numberClosed= formattedLine.match(/\}/g)?.length
+    const numberOpen= formattedLine.match(/\{/g)?.length
     // Ajustar el nivel de indentación según las llaves de cierre
-    if (/\}/.test(trimmedLine)) {
-      indentationLevel = Math.max(0, indentationLevel - 1);
+    if (numberClosed) {
+      indentationLevel =indentationLevel - 1;
     }
 
     // Ajustar la indentación adecuada
     const indentedLine = addIdentado(formattedLine,indentationLevel);
 
+    if (numberClosed > 1) {
+      indentationLevel =indentationLevel - numberClosed + 1;
+    }
+
     // Ajustar el nivel de indentación según las llaves de apertura
-    if (/\{$/.test(trimmedLine)) {
+    if (numberOpen) {
       indentationLevel++;
     }
 
@@ -73,7 +102,7 @@ const  clearCode =  (text: string):string =>{
   let nuwText = text;
 
   //([ \t]*)(.*)}}+
-  //corregir }}
+  //agregar saltos de liena cuando seencuentran }}
   //^([ \t])*([^\}\n]*)\s*(}}+)
   nuwText = nuwText.replace(/^([ \t]*)([^\}\n]*?)(}}+)/gm,(match, p1, p2, p3) => {
     let text = p1 + p2;
