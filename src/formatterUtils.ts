@@ -35,11 +35,11 @@ const charIdent="\t"
 const numberCharIdent=2
 
 const getIdentationLevel = (textLine: string):number => {
-  const textIdent = textLine.match(/^([ \t]*)/)
+  const textIdent = textLine.match(/^([ \t]*)/);
   if (!textIdent) {
     return 0;
   }
-  const arrayIdent = textIdent[1].match(/([ \t])/g)
+  const arrayIdent = textIdent[1].match(/([ \t])/g);
   if (!arrayIdent){
     return 0;
   }
@@ -55,7 +55,7 @@ const getTextIdent = (indentationLevel:number):string =>{
 
 const addIdentado = (textLine: string,indentationLevel :number = 0):string =>{
   if (!textLine){
-    return ""
+    return "";
   }
 
   return getTextIdent(indentationLevel) + textLine;
@@ -73,8 +73,8 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 
     const formattedLine = formaBaseLine(trimmedLine);
 
-    const numberClosed= formattedLine.match(/\}/g)?.length
-    const numberOpen= formattedLine.match(/\{/g)?.length
+    const numberClosed= formattedLine.match(/\}/g)?.length;
+    const numberOpen= formattedLine.match(/\{/g)?.length;
     // Ajustar el nivel de indentación según las llaves de cierre
     if (numberClosed) {
       indentationLevel =indentationLevel - 1;
@@ -113,7 +113,7 @@ const  clearCode =  (text: string):string =>{
       }
       space = space.slice(0, -1);
       return prev +"\n"+space+dat;
-    },text)
+    },text);
     return text;
   });
 
