@@ -89,7 +89,7 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 
     if (trimmedLine.match(/^XData\s+\w+/)) {
       insideXData = true;
-      //open <\/[^>]+>
+      //open <[^>\/]+>
       //close <\/[^>]+>
     }
 
@@ -99,14 +99,14 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
     const numberClosed= formattedLine.match(/\}/g)?.length;
     // Ajustar el nivel de indentación según las llaves de cierre
     if (numberClosed && !insideXData) {
-      indentationLevel =indentationLevel - 1;
+      indentationLevel = indentationLevel - 1;
     }
 
     // Ajustar la indentación adecuada
     const indentedLine = addIdentado(formattedLine,indentationLevel);
 
     if (numberClosed > 1 && !insideXData) {
-      indentationLevel =indentationLevel - numberClosed + 1;
+      indentationLevel = indentationLevel - numberClosed + 1;
     }
 
     // Ajustar el nivel de indentación según las llaves de apertura
