@@ -71,4 +71,9 @@ XData MessageMap
  </MapItems>
 }
 
+Method obtenerAlergiasPacienteWS(pRequest As cysnet.cun.adtbroker.msg.ObtenerAlergiasPacienteRequest, Output pResponse As cysnet.cun.adtbroker.msg.ObtenerAlergiasPacienteResponse) As %Status
+{
+	                 quit ##class(cysnet.cun.adtbroker.op.core.HL7BrokerWSCore).obtenerAlergiasPaciente(pRequest, .pResponse, $this)
+}
+
 }

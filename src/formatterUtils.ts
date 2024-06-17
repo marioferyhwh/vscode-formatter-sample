@@ -80,32 +80,42 @@ const addIdentado = (textLine: string,indentationLevel :number = 0):string =>{
 // Función para limpiar y formatear las líneas del documento
 const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
   const formattedLines: string[] = [];
-
+  let insideXData = false;
   let indentationLevel = -1;
 
   for (let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     const trimmedLine = line.text.trim();
 
-    const formattedLine = formaBaseLine(trimmedLine);
+    if (trimmedLine.match(/^XData\s+\w+/)) {
+      insideXData = true;
+      //open <\/[^>]+>
+      //close <\/[^>]+>
+    }
 
-    const numberClosed= formattedLine.match(/\}/g)?.length;
+    const formattedLine = insideXData ? trimmedLine : formaBaseLine(trimmedLine);
+
     const numberOpen= formattedLine.match(/\{/g)?.length;
+    const numberClosed= formattedLine.match(/\}/g)?.length;
     // Ajustar el nivel de indentación según las llaves de cierre
-    if (numberClosed) {
+    if (numberClosed && !insideXData) {
       indentationLevel =indentationLevel - 1;
     }
 
     // Ajustar la indentación adecuada
     const indentedLine = addIdentado(formattedLine,indentationLevel);
 
-    if (numberClosed > 1) {
+    if (numberClosed > 1 && !insideXData) {
       indentationLevel =indentationLevel - numberClosed + 1;
     }
 
     // Ajustar el nivel de indentación según las llaves de apertura
-    if (numberOpen) {
+    if (numberOpen && !insideXData) {
       indentationLevel++;
+    }
+    
+    if (insideXData && trimmedLine.match(/^}/)) {
+      insideXData = false;
     }
 
     formattedLines.push(indentedLine);
