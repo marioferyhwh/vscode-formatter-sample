@@ -4,8 +4,9 @@ import * as vscode from 'vscode';
 import { formatDocument, applyEdits } from './formatterUtils';
 
 export function activate(context: vscode.ExtensionContext) {
-  const LANGUAGE_ID = "any-lang";
-  const COMMAND_FORMAT = "extension.format-any";
+  const LANGUAGE_ID = "objectscript";
+  const COMMAND_FORMAT = "extension.formatObjectScript";
+
     
   // 👎 Formatter implemented as separate command
   vscode.commands.registerCommand(COMMAND_FORMAT, () => {

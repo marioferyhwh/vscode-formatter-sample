@@ -1,6 +1,10 @@
 
 import * as vscode from 'vscode';
 
+
+let charIdent=" "
+let numberCharIdent=2
+
 // Función para aplicar ediciones al documento
 export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit[]) => {
   if (edits.length > 0) {
@@ -10,6 +14,19 @@ export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit
   }
 }
 
+function UpdateConfigBase(){
+  
+  // Obtener configuraciones de usuario
+  const config = vscode.workspace.getConfiguration('formatterSample');
+  numberCharIdent = config.get<number>('indentationSize', 2);
+  const indentationType = config.get<string>('indentationType', 'space');
+  if (indentationType == "space"){
+    charIdent = " ";
+  }else{
+    charIdent = "\t";
+  }
+  //vscode.window.showInformationMessage("size:" + numberCharIdent +" indentationType:"+indentationType);
+}
 //(\/\/.*$|\/\*(.|\n)*?\*\/)
 const formaBaseLine = (textLine: string):string =>{
   let nuwTextLine = textLine;
@@ -31,8 +48,7 @@ const formaBaseLine = (textLine: string):string =>{
   return nuwTextLine;
 }
 
-const charIdent=" "
-const numberCharIdent=2
+
 
 const getIdentationLevel = (textLine: string):number => {
   const textIdent = textLine.match(/^([ \t]*)/);
@@ -134,6 +150,7 @@ const  clearCode =  (text: string):string =>{
 
 // Función para formatear un documento
 export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
+  UpdateConfigBase();
   const edits: vscode.TextEdit[] = [];
 
   let formattedText = cleanAndFormatLines(document).join('\n');
