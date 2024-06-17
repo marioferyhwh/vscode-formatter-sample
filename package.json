@@ -1,7 +1,7 @@
 {
-    "name": "formatter-any",
-    "displayName": "formatter-any",
-    "description": "formay any language",
+    "name": "Formatter ObjectScript",
+    "displayName": "formatter-ObjectScript",
+    "description": "formay ObjectScript language",
     "version": "0.0.1",
     "publisher": "mfrobayo",
     "engines": {
@@ -34,7 +34,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "Formatter Sample",
+            "title": "Formatter ObjectScript",
             "properties": {
                 "formatterSample.indentationSize": {
                     "type": "number",
