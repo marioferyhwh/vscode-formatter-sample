@@ -11,27 +11,45 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:any-lang"
+        "onLanguage:objectscript"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "languages": [
             {
-                "id": "any-lang",
+                "id": "objectscript",
                 "aliases": [
-                    "Foo"
+                    "ObjectScript"
                 ],
                 "extensions": [
-                    "foo"
+                    ".cls"
                 ]
             }
         ],
         "commands": [
             {
-                "command": "extension.format-any",
-                "title": "Format any Files"
+              "command": "extension.formatObjectScript",
+              "title": "Format ObjectScript Files"
             }
-        ]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Formatter Sample",
+            "properties": {
+                "formatterSample.indentationSize": {
+                    "type": "number",
+                    "default": 2,
+                    "minimum": 1,
+                    "description": "Number of spaces for indentation"
+                },
+                "formatterSample.indentationType": {
+                    "type": "string",
+                    "enum": ["space", "tab"],
+                    "default": "space",
+                    "description": "Type of indentation"
+                }
+            }
+        }
     },
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install && tsc"
