@@ -99,21 +99,27 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
       OpenXdata = trimmedLine.match(/<[^>\/]+>/g)?.length || 0;
       CloseXdata = trimmedLine.match(/<\/[^>]+>/g)?.length || 0;
     }
-    
     let OpenBreak = trimmedLine.match(/\{/g)?.length || 0;
     let CloseBreak = trimmedLine.match(/\}/g)?.length || 0;
+    
+    const numberOpen = OpenBreak + OpenXdata;
+    const numberClosed = CloseBreak + CloseXdata;
 
     const formattedLine = insideXData ? trimmedLine : formaBaseLine(trimmedLine);
 
-    const numberOpen = OpenBreak + OpenXdata;
-    const numberClosed = CloseBreak + CloseXdata;
     // Ajustar el nivel de indentación según las llaves de cierre
-    if (numberClosed) {
+    if (numberClosed && !(OpenXdata && CloseXdata)) {
       indentationLevel = indentationLevel - 1;
     }
 
     // Ajustar la indentación adecuada
     const indentedLine = addIdentado(formattedLine,indentationLevel);
+
+    
+    // Ajustar el nivel de indentación según las llaves de cierre
+    if (numberClosed && (OpenXdata && CloseXdata)) {
+      indentationLevel = indentationLevel - 1;
+    }
 
     if (numberClosed > 1) {
       indentationLevel = indentationLevel - numberClosed + 1;
