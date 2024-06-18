@@ -1,10 +1,22 @@
-# Good and Bad Formatter
 
+## Usage
 
-This is a sample for a simple (and stupid) formatter that integrates into VS Code in two way: Once as a [comm](https://github.com/jrieken/vscode-formatter-sample/blob/master/src/extension.ts#L8)[and](https://github.com/jrieken/vscode-formatter-sample/blob/master/package.json#L31) and once (better) 
-via the [formatter](https://github.com/jrieken/vscode-formatter-sample/blob/master/src/extension.ts#L23)-api. The latter as the following advantages:
+Once installed, the extension will automatically activate when you open an ObjectScript file (`.cls` extension). It provides a command to format these files:
 
-* is less code
-* is invoked from the formatter actions and keybindings
-* is invoked from format on save
-* is future proof for things like *format all files in folders* etc
+- **Format ObjectScript Files**: You can run this command from the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS) by searching for `Format ObjectScript Files`.
+
+## Configuration
+
+You can customize the formatting settings for ObjectScript files by adding the following options in your `settings.json` file:
+
+- `formatterSample.indentationSize`: Specifies the number of spaces for indentation.
+  - Type: `number`
+  - Default: `2`
+  - Minimum: `1`
+  - Description: Sets the number of spaces used for indentation.
+
+- `formatterSample.indentationType`: Specifies the type of indentation.
+  - Type: `string`
+  - Enum: `["space", "tab"]`
+  - Default: `space`
+  - Description: Determines whether to use spaces or tabs for indentation
