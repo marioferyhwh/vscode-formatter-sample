@@ -31,16 +31,24 @@ function UpdateConfigBase(){
 const formaBaseLine = (textLine: string):string =>{
   let nuwTextLine = textLine;
   //agrega espacios en logica
-  nuwTextLine = nuwTextLine.replace(/(if|else|elseif|try|catch|while|for|switch)\s*\(\s*([^{]*)\s*\)\s*/gi, '$1 ( $2 ) ');
-  nuwTextLine = nuwTextLine.replace(/\}\s*(catch|else|elseif)\s*/gi, '} $1 ');
+  nuwTextLine = nuwTextLine.replace(/(elseif|if|else|try|catch|while|for|switch)\s*\(\s*([^{]*)\s*\)\s*/gi, '$1 ( $2 ) ');
+  nuwTextLine = nuwTextLine.replace(/\}\s*(catch|elseif|else)\s*/gi, '} $1 ');
   nuwTextLine = nuwTextLine.replace(/\s*(try)\s*\{/gi, '$1 {');
-  //agrega espacio en operadores
-  nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, ' $1 ');
+  //validar if quit:condition
+  const pointCondition = textLine.match(/^[ \t]*(quit):(\s*([^\n]*)\s*)$/);
+  let expectSpaceOpetator = ' $1 ';
+  if (pointCondition != null){
+    expectSpaceOpetator = '$1';
+  }
+  //modificar espacio en operadores
+  nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, expectSpaceOpetator);
   //separacionde (a,b,    b   )=>(a, b, b)
   nuwTextLine = nuwTextLine.replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
     return match.replace(/\s*,\s*/g, ", ");
   });
 
+  // Elimnar ; 
+  nuwTextLine = nuwTextLine.replace(/^\s*((set|quit|write|do)[^\n;]*)[;\s]*$/ig, '$1')
   // Eliminar espacios dobles y al final del renglón
   nuwTextLine = nuwTextLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
   // Eliminar líneas que contienen solo espacios o tabs
@@ -178,12 +186,12 @@ const  clearCode =  (text: string):string =>{
 export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[] => {
   UpdateConfigBase();
   const edits: vscode.TextEdit[] = [];
-
-  let formattedText = cleanAndFormatLines(document).join('\n');
+  const lines = cleanAndFormatLines(document);
+  let formattedText = lines.join('\n');
 
   //\{|\(|\[
   // Agregar saltos de línea a los corchetes
-  formattedText = formattedText.replace(/(\{)/g, '$1\n')//.replace(/(\s*\})/g, '\n$1\n');
+  formattedText = formattedText.replace(/^([^\n\/\/]*\{)/gm, '$1\n');
 
   formattedText = clearCode(formattedText);
 
