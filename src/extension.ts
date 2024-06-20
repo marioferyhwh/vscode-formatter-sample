@@ -9,14 +9,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     
   // 👎 Formatter implemented as separate command
-  vscode.commands.registerCommand(COMMAND_FORMAT, () => {
+  vscode.commands.registerCommand(COMMAND_FORMAT, async() => {
     vscode.window.showInformationMessage("Evento " + COMMAND_FORMAT);
     const { activeTextEditor } = vscode.window;
 
     if (activeTextEditor) {
       const { document } = activeTextEditor;
       const edits = formatDocument(document);
-      applyEdits(document, edits);
+      await applyEdits(document, edits);
+      //await document.save();
     }
   });
 
@@ -29,11 +30,12 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Escuchar el evento de guardado de documentos
-  vscode.workspace.onDidSaveTextDocument(document => {
+  vscode.workspace.onDidSaveTextDocument(async (document) => {
     vscode.window.showInformationMessage("Se detecta guardado");
     if (document.languageId !== LANGUAGE_ID && document.fileName.endsWith('.foo')) {
       //const edits = formatDocument(document);
-      //applyEdits(document, edits);
+      //await applyEdits(document, edits);
+      //await document.save();
     }
   });
 }

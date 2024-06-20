@@ -6,11 +6,11 @@ let charIdent=" "
 let numberCharIdent=2
 
 // Función para aplicar ediciones al documento
-export const applyEdits = (document: vscode.TextDocument, edits: vscode.TextEdit[]) => {
+export const applyEdits = async (document: vscode.TextDocument, edits: vscode.TextEdit[]) => {
   if (edits.length > 0) {
     const workspaceEdit = new vscode.WorkspaceEdit();
     edits.forEach(edit => workspaceEdit.replace(document.uri, edit.range, edit.newText));
-    vscode.workspace.applyEdit(workspaceEdit);
+    await  vscode.workspace.applyEdit(workspaceEdit);
   }
 }
 
