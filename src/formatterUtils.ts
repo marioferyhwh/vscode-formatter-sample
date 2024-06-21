@@ -10,12 +10,11 @@ export const applyEdits = async (document: vscode.TextDocument, edits: vscode.Te
   if (edits.length > 0) {
     const workspaceEdit = new vscode.WorkspaceEdit();
     edits.forEach(edit => workspaceEdit.replace(document.uri, edit.range, edit.newText));
-    await  vscode.workspace.applyEdit(workspaceEdit);
+    await vscode.workspace.applyEdit(workspaceEdit);
   }
 }
 
 function UpdateConfigBase(){
-  
   // Obtener configuraciones de usuario
   const config = vscode.workspace.getConfiguration('formatterSample');
   numberCharIdent = config.get<number>('indentationSize', 2);
@@ -25,9 +24,8 @@ function UpdateConfigBase(){
   }else{
     charIdent = "\t";
   }
-  //vscode.window.showInformationMessage("size:" + numberCharIdent +" indentationType:"+indentationType);
 }
-//(\/\/.*$|\/\*(.|\n)*?\*\/)
+
 const formaBaseLine = (textLine: string):string =>{
   let nuwTextLine = textLine;
   //agrega espacios en logica
@@ -42,12 +40,12 @@ const formaBaseLine = (textLine: string):string =>{
   }
   //modificar espacio en operadores
   nuwTextLine = nuwTextLine.replace(/\s*(>=|<=|'=|>|<|=)\s*/ig, expectSpaceOpetator);
-  //separacionde (a,b,    b   )=>(a, b, b)
+  //separacion (a,b,    b   )=>(a, b, b)
   nuwTextLine = nuwTextLine.replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
     return match.replace(/\s*,\s*/g, ", ");
   });
 
-  // Elimnar ; 
+  // Elimnar ;
   nuwTextLine = nuwTextLine.replace(/^\s*((set|quit|write|do)[^\n;]*)[;\s]*$/ig, '$1')
   // Eliminar espacios dobles y al final del renglón
   nuwTextLine = nuwTextLine.replace(/\s{2,}/g, ' ').replace(/\s+$/g, '');
@@ -95,10 +93,8 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
     const line = document.lineAt(i);
     const trimmedLine = line.text.trim();
 
-    if (trimmedLine.match(/^XData\s+\w+/)) {
+    if (trimmedLine.match(/^(XData|Storage)\s+\w+/)) {
       insideXData = true;
-      //open <[^>\/]+>
-      //close <\/[^>]+>
     }
     
     let OpenXdata = 0;
@@ -151,9 +147,7 @@ const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
 const  clearCode =  (text: string):string =>{
   let nuwText = text;
 
-  //([ \t]*)(.*)}}+
   //agregar saltos de liena cuando seencuentran }}
-  //^([ \t])*([^\}\n]*)\s*(}}+)
   nuwText = nuwText.replace(/^([ \t]*)([^\}\n]*?)(}}+)/gm,(match, p1, p2, p3) => {
     let text = p1 + p2;
     let identationLevel = getIdentationLevel(p1)
@@ -189,7 +183,6 @@ export const formatDocument = (document: vscode.TextDocument): vscode.TextEdit[]
   const lines = cleanAndFormatLines(document);
   let formattedText = lines.join('\n');
 
-  //\{|\(|\[
   // Agregar saltos de línea a los corchetes
   formattedText = formattedText.replace(/^([^\n\/\/]*\{)/gm, '$1\n');
 

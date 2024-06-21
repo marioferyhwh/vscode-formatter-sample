@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
       const { document } = activeTextEditor;
       const edits = formatDocument(document);
       await applyEdits(document, edits);
-      //await document.save();
+      await document.save();
     }
   });
 
