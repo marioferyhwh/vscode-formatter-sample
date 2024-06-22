@@ -2,7 +2,7 @@
     "name": "formatter-objectscript",
     "displayName": "formatter-any",
     "description": "format ObjectScript language",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "publisher": "mfrobayo",
     "engines": {
         "vscode": "^1.6.0"
@@ -11,18 +11,19 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:objectscript"
+        "workspaceContains:**/*.cls",
+        "onLanguage:objectscript-class"
     ],
     "main": "./out/src/extension",
     "contributes": {
         "languages": [
             {
-                "id": "objectscript",
+                "id": "objectscript-class",
                 "aliases": [
-                    "ObjectScript"
+                  "ObjectScript Class"
                 ],
                 "extensions": [
-                    ".cls"
+                  ".cls"
                 ]
             }
         ],
@@ -33,22 +34,34 @@
             }
         ],
         "configuration": {
-            "type": "object",
-            "title": "Formatter ObjectScript",
-            "properties": {
-                "formatterSample.indentationSize": {
-                    "type": "number",
-                    "default": 2,
-                    "minimum": 1,
-                    "description": "Number of spaces for indentation"
-                },
-                "formatterSample.indentationType": {
-                    "type": "string",
-                    "enum": ["space", "tab"],
-                    "default": "space",
-                    "description": "Type of indentation"
+          "type": "object",
+          "title": "Formatter ObjectScript",
+          "properties": {
+              "FormatterObjectScript.indentationSize": {
+                  "type": "number",
+                  "default": 2,
+                  "minimum": 1,
+                  "description": "Number of spaces or tabs to use for indentation."
+              },
+              "FormatterObjectScript.useSpacesForIndentation": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Use spaces for indentation. If false, tabs will be used."
+              },
+              "FormatterObjectScript.enableFormattingOnSave": {
+                "type": "boolean",
+                "default": true,
+                "description": "Enable or disable automatic formatting when a file is saved."
+              },
+              "FormatterObjectScript.supportedExtensionsOnSave": {
+                "type": "array",
+                "default": [],
+                "description": "List of file extensions supported by the formatter on save ej: .cls .foo",
+                "items": {
+                  "type": "string"
                 }
-            }
+              }
+          }
         }
     },
     "scripts": {

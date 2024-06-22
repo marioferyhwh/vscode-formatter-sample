@@ -32,17 +32,17 @@ if(1'=2){
 Method Save() As %Status {
   Try {
         Set sc=..%Save();
-    }        Catch (Exception e) {
+    }        Catch (e) {
         Set sc = e.AsStatus();
            }
   Try{
         Set sc=..%Save();
-    }        Catch (Exception e) {
+    }        Catch (e) {
         Set sc = e.AsStatus();
            }
 Try{
         Set sc=..%Save();
-    }        Catch (Exception e) {
+    }        Catch (e) {
         Set sc = e.AsStatus();
            }
     Quit sc;
@@ -57,7 +57,7 @@ ClassMethod Test() As %Status {
         } Else{
           Write "Hello, someone else!";
         }
-    }     Catch     (Exception e) {
+    }     Catch     (e) {
 Write "Error: ", e.Message;
             }
     Try {
@@ -68,7 +68,7 @@ Write "Error: ", e.Message;
         } Else{
           Write "Hello, someone else!";
         }
-    }Catch(Exception e) {
+    }Catch(e) {
 Write "Error: ", e.Message;
             }
     Quit $$$OK;
@@ -82,7 +82,7 @@ Method GetName2() As %String {
   if(1 >=2){
   }
   if(1<=  2){
-    (1,2,3      ,4,     5)
+    set a = (1,2,3      ,4,     5)
   }
   if(1'=2){
   if(1=2){
