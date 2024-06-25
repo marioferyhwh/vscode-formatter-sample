@@ -39,13 +39,14 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidSaveTextDocument(async (document) => {
     const config = vscode.workspace.getConfiguration("FormatterObjectScript");
     const formattingOnSave = config.get<boolean>("enableFormattingOnSave", true);
-    const supportedExtensions = config.get<string[]>("supportedExtensionsOnSave", []);
-    const fileExtension = document.fileName.split('.').pop();
-    const validExtension = fileExtension && supportedExtensions.includes(`.${fileExtension}`)
-    
-    vscode.window.showInformationMessage("Se detecta guardado");
-    if (formattingOnSave && (document.languageId == LANGUAGE_ID || validExtension)) {
-      await executeFormatter(document);
+    if (formattingOnSave){
+      vscode.window.showInformationMessage("Se detecta guardado");
+      const supportedExtensions = config.get<string[]>("supportedExtensionsOnSave", []);
+      const fileExtension = document.fileName.split('.').pop();
+      const validExtension = fileExtension && supportedExtensions.includes(`.${fileExtension}`)
+      if ((document.languageId == LANGUAGE_ID || validExtension)) {
+        await executeFormatter(document);
+      }
     }
   });
 }

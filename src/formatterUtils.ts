@@ -2,6 +2,7 @@
 "use strict";
 
 import * as vscode from "vscode";
+import { FormatterState } from "./interface/FormatterState";
 
 let charIndent = " ";
 let numberCharIndent = 2;
@@ -21,7 +22,7 @@ export const applyEdits = async (
 };
 
 // Actualizar configuraciones base
-const updateConfigBase = () =>{
+const updateConfigBase = () => {
   const config = vscode.workspace.getConfiguration("FormatterObjectScript");
   numberCharIndent = config.get<number>("indentationSize", 0);
   const useSpaces = config.get<boolean>("useSpacesForIndentation", true);
@@ -31,43 +32,43 @@ const updateConfigBase = () =>{
 const formatCodeInLine = (textLine: string): string => {
   if (!textLine) return textLine;
 
-  let newTextLine  = textLine;
+  let newTextLine = textLine;
   //agrega espacios en logica
-  newTextLine  = newTextLine .replace(
+  newTextLine = newTextLine.replace(
     /(elseif|if|else|try|for|switch)\s*\(\s*([^{]*)\s*\)/gi,
     "$1 ( $2 ) "
   );
-  newTextLine  = newTextLine .replace(
-    /(catch|while)\s*\(\s*([^{]*)\s*\)/gi, (match, p1, p2)=>{
+  newTextLine = newTextLine.replace(
+    /(catch|while)\s*\(\s*([^{]*)\s*\)/gi, (match, p1, p2) => {
       return `${p1} (${p2.trim()})`;
     }
   );
-  newTextLine  = newTextLine .replace(/\}\s*(catch|elseif|else)\s*/gi, "} $1 ");
-  newTextLine  = newTextLine .replace(/\s*(try)\s*\{/gi, "$1 {");
+  newTextLine = newTextLine.replace(/\}\s*(catch|elseif|else)\s*/gi, "} $1 ");
+  newTextLine = newTextLine.replace(/\s*(try)\s*\{/gi, "$1 {");
   //validar if quit:condition
   const pointCondition = textLine.match(/^[ \t]*(quit):(\s*([^\n]*)\s*)$/);
   const expectSpaceOperator = pointCondition ? "$1" : " $1 ";
 
   //modificar espacio en operadores
-  newTextLine  = newTextLine .replace(
+  newTextLine = newTextLine.replace(
     /\s*(>=|<=|'=|>|<|=)\s*/gi,
     expectSpaceOperator
   );
   //separacion (a,b,    b   )=>(a, b, b)
-  newTextLine  = newTextLine .replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
+  newTextLine = newTextLine.replace(/(?<=\()([^)]+)(?=\))/g, (match) => {
     return match.replace(/\s*,\s*/g, ", ");
   });
 
   // Elimnar ;
-  newTextLine  = newTextLine .replace(
+  newTextLine = newTextLine.replace(
     /^\s*((set|quit|write|do)[^\n;]*)[;\s]*$/gi,
     "$1"
   );
   // Eliminar espacios dobles y al final del renglón
-  newTextLine  = newTextLine .replace(/\s{2,}/g, " ").replace(/\s+$/g, "");
+  newTextLine = newTextLine.replace(/\s{2,}/g, " ").replace(/\s+$/g, "");
   // Eliminar líneas que contienen solo espacios o tabs
-  newTextLine  = newTextLine .replace(/^[ \t]+$/gm, "");
-  return newTextLine ;
+  newTextLine = newTextLine.replace(/^[ \t]+$/gm, "");
+  return newTextLine;
 };
 
 // Formatear base de una línea
@@ -124,100 +125,109 @@ const detectBrace = (text: string): [number, number] => {
   return [OpenBrace, CloseBrace];
 }
 
+const outTestCode = (text: string, commitOpen: boolean): [string, boolean] => {
+  let textOut = "";
+  if (!commitOpen) {
+    const textWithoutComment1 = text.match(/^([^\n]*?)(?=\/\/|$)/)[0] ?? "";
+    const textWithoutComment2 = textWithoutComment1.replace(/\/\*.*?\*\//gm, "");
+    const textWithoutComment3 = textWithoutComment2.replace(/^(.*?)(?=\/\*)\/\*.*?$/, "$1");
+    if (textWithoutComment3 != textWithoutComment2) {
+      commitOpen = true;
+    }
+    textOut = textWithoutComment3;
+  } else {
+    const textWithoutComment1 = text.replace(/^.*?(?=\*\/)\*\/(.*?)$/gm, "$1");
+    if (textWithoutComment1 != text) {
+      commitOpen = false;
+    }
+    if (commitOpen) {
+      textOut = "";
+    } else {
+      const textWithoutComment2 = textWithoutComment1.match(/^([^\n]*?)(?=\/\/|$)/)[0] ?? "";
+      const textWithoutComment3 = textWithoutComment2.replace(/\/\*.*?\*\//gm, "");
+      const textWithoutComment4 = textWithoutComment3.replace(/^(.*?)(?=\/\*)\/\*.*?$/, "$1");
+      if (textWithoutComment3 != textWithoutComment4) {
+        commitOpen = true;
+      }
+      textOut = textWithoutComment4;
+    }
+  }
+  return [textOut, commitOpen];
+}
+
+
+const initialState: FormatterState = {
+  insideXData: false,
+  insideOff: false,
+  indentationLevel: -1,
+  oldTextCode: "",
+  commitOpen: false,
+};
+
+
+
+const calculateIndentation = (trimmedLine: string, stateConfig: FormatterState): FormatterState => {
+
+  const [oldOpenXml, oldCloseXml] = stateConfig.insideXData ? detectXml(stateConfig.oldTextCode) : [0, 0];
+  const [oldOpenBrace, oldCloseBrace] = detectBrace(stateConfig.oldTextCode);
+  const oldNumberOpen = oldOpenBrace + oldOpenXml;
+  const oldNumberClosed = oldCloseBrace + oldCloseXml;
+
+  // Ajustar el nivel de indentación según las llaves de cierre
+  if (oldNumberClosed && oldOpenXml && oldCloseXml) {
+    stateConfig.indentationLevel = stateConfig.indentationLevel - 1;
+  }
+
+  if (oldNumberClosed > 1) {
+    stateConfig.indentationLevel = stateConfig.indentationLevel - oldNumberClosed + 1;
+  }
+
+  // Ajustar el nivel de indentación según las llaves de apertura
+  if (oldNumberOpen) {
+    stateConfig.indentationLevel++;
+  }
+
+  if ((stateConfig.insideXData || stateConfig.insideOff) && stateConfig.oldTextCode.match(/^}/)) {
+    stateConfig.insideXData = false;
+    stateConfig.insideOff = false;
+  }
+  let textCode: string;
+  [textCode, stateConfig.commitOpen] = outTestCode(trimmedLine, stateConfig.commitOpen);
+  if (textCode.match(/^s*(XData)\s*MessageMap/)) {
+    stateConfig.insideXData = true;
+  } else if (textCode.match(/^s*(XData|Storage)\s+\w+/)) {
+    stateConfig.insideOff = true;
+  }
+
+  const [openXml, closeXml] = stateConfig.insideXData ? detectXml(textCode) : [0, 0];
+  const [openBrace, closeBrace] = detectBrace(textCode);
+
+  //const numberOpen = OpenBreak + OpenXdata;
+  const numberClosed = closeBrace + closeXml;
+
+  // Ajustar el nivel de indentación según las llaves de cierre
+  if (numberClosed && !(openXml && closeXml)) {
+    stateConfig.indentationLevel = stateConfig.indentationLevel - 1;
+  }
+  stateConfig.oldTextCode = textCode;
+  //oldTextLine = trimmedLine;
+  return stateConfig;
+}
+
 // Limpiar y formatear líneas del documento
 const cleanAndFormatLines = (document: vscode.TextDocument): string[] => {
   const formattedLines: string[] = [];
-  let insideXData = false;
-  let insidetOff = false;
-  let indentationLevel = -1;
-  let oldTextCode = "";
-  let commitOpen = false;
+  let stateConfig: FormatterState = { ...initialState };
 
-  const outTestCode = (text: string): string => {
-    let textOut = "";
-    if (!commitOpen) {
-      const textWithoutComment1 = text.match(/^([^\n]*?)(?=\/\/|$)/)[0] ?? "";
-      const textWithoutComment2 = textWithoutComment1.replace(/\/\*.*?\*\//gm, "");
-      const textWithoutComment3 = textWithoutComment2.replace(/^(.*?)(?=\/\*)\/\*.*?$/, "$1");
-      if (textWithoutComment3 != textWithoutComment2) {
-        commitOpen = true;
-      }
-      textOut = textWithoutComment3;
-    } else {
-      const textWithoutComment1 = text.replace(/^.*?(?=\*\/)\*\/(.*?)$/gm, "$1");
-      if (textWithoutComment1 != text) {
-        commitOpen = false;
-      }
-      if (commitOpen) {
-        textOut = "";
-      } else {
-        const textWithoutComment2 = textWithoutComment1.match(/^([^\n]*?)(?=\/\/|$)/)[0] ?? "";
-        const textWithoutComment3 = textWithoutComment2.replace(/\/\*.*?\*\//gm, "");
-        const textWithoutComment4 = textWithoutComment3.replace(/^(.*?)(?=\/\*)\/\*.*?$/, "$1");
-        if (textWithoutComment3 != textWithoutComment4) {
-          commitOpen = true;
-        }
-        textOut = textWithoutComment4;
-      }
-    }
-    return textOut;
-  }
-
-  const calculateIndentation = (trimmedLine: string): void => {
-
-    const [oldOpenXml, oldCloseXml] = insideXData ? detectXml(oldTextCode) : [0, 0];
-    const [oldOpenBrace, oldCloseBrace] = detectBrace(oldTextCode);
-    const oldNumberOpen = oldOpenBrace + oldOpenXml;
-    const oldNumberClosed = oldCloseBrace + oldCloseXml;
-
-    // Ajustar el nivel de indentación según las llaves de cierre
-    if (oldNumberClosed && oldOpenXml && oldCloseXml) {
-      indentationLevel = indentationLevel - 1;
-    }
-
-    if (oldNumberClosed > 1) {
-      indentationLevel = indentationLevel - oldNumberClosed + 1;
-    }
-
-    // Ajustar el nivel de indentación según las llaves de apertura
-    if (oldNumberOpen) {
-      indentationLevel++;
-    }
-
-    if ((insideXData || insidetOff) && oldTextCode.match(/^}/)) {
-      insideXData = false;
-      insidetOff = false;
-    }
-
-    const textCode = outTestCode(trimmedLine);
-    if (textCode.match(/^s*(XData)\s*MessageMap/)) {
-      insideXData = true;
-    } else if (textCode.match(/^s*(XData|Storage)\s+\w+/)) {
-      insidetOff = true;
-    }
-
-    const [openXml, closeXml] = insideXData ? detectXml(textCode) : [0, 0];
-    const [openBrace, closeBrace] = detectBrace(textCode);
-
-    //const numberOpen = OpenBreak + OpenXdata;
-    const numberClosed = closeBrace + closeXml;
-
-    // Ajustar el nivel de indentación según las llaves de cierre
-    if (numberClosed && !(openXml && closeXml)) {
-      indentationLevel = indentationLevel - 1;
-    }
-    oldTextCode = textCode;
-    //oldTextLine = trimmedLine;
-  }
 
   for (let i = 0; i < document.lineCount; i++) {
     const line = document.lineAt(i);
     const trimmedLine = line.text.trim();
-    calculateIndentation(trimmedLine);
-    const formattedLine = insideXData || insidetOff
+    stateConfig = calculateIndentation(trimmedLine, stateConfig);
+    const formattedLine = stateConfig.insideXData || stateConfig.insideOff
       ? trimmedLine
       : formatBaseLine(trimmedLine);
-    const indentedLine = addIndentation(formattedLine, insidetOff ? 0 :indentationLevel);
+    const indentedLine = addIndentation(formattedLine, stateConfig.insideOff ? 0 : stateConfig.indentationLevel);
 
     formattedLines.push(indentedLine);
   }
