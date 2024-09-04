@@ -62,3 +62,4 @@ To package the extension for distribution, run the following command:
 
 ```sh
 npm run generate
+```
